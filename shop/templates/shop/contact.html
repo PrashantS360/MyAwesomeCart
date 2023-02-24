@@ -1,0 +1,70 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} Contact Us {% endblock %}
+{% block contact %} active {% endblock contact %}
+{% block body %}
+
+<div class="container my-4">
+  <div class="row">    
+    <div class="col-md-6 my-2">
+      <h2><b>Contact Us</b> </h2>
+      <p style="font-size: 0.8rem;">Feel free to ask your doubts and concern with us about any type of query regarding our website or shopping details.</p>
+    </div>
+
+    <!-- Alert Message -->
+    <!-- <div class="col-md-6 d-none alert-msg">
+      <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-check-circle mx-2"></i>Well done!</h4>
+        <p class="my-0">Aww yeah, You have successfully submitted the form</p>
+      </div>
+    </div> -->
+
+  </div>
+  <form action="/shop/contact/" method="post" id="submitDetails">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input type="email" class="form-control" id="email" aria-describedby="emailHelp" name="email" required>
+      <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+    <div class="mb-3">
+      <label for="phone" class="form-label">Phone</label>
+      <input type="tel" class="form-control" id="phone" name="phone" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="desc" class="form-label">How May We Help You?</label>
+      <textarea class="form-control" id="desc" rows="3" name="desc" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+  document.getElementById('popcart').setAttribute('disabled', 'true');
+  
+  // let submitDetails = document.getElementById('submitDetails');
+  // submitDetails.addEventListener('submit',(e)=>{
+  //   e.preventDefault();
+  //   console.log('form is submitted');
+  //   document.getElementById('alert-msg').style.display = 'block !important';
+  //   setTimeout(() => {
+  //     window.location = '/shop';
+  //   }, 2000);
+  // })
+
+  // {% if thank %}
+    // alert('Hurray!, You have successfully submitted the form');
+    // window.location = "/shop";
+  // {% endif %}
+  // });
+
+</script>
+{% endblock %}

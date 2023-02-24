@@ -1,0 +1,167 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} My Awesome Cart - Find your search results {% endblock %}
+{% block body %}
+<div class="container my-4" style="min-height: 63vh;">
+    <div class="list-group">
+        {% if found %}
+        <div class="col-md-4">
+            <button type="button" class="btn btn-light position-relative my-2" style="width: 100%;" disabled>
+                <h2> Search Results.......</h2><hr>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 1.1rem">
+                    {{length}}
+                </span>
+            </button> 
+        </div>
+        {% for i in products %}
+        <div class="list-group-item list-group-item-action border-0" aria-current="true">
+            <div class="row">
+                <div class="col-md-6 text-center">
+                    <img src="/media/{{i.image}}" alt="product_image" style="max-width: 40vw; max-height: 40vh;">
+                </div>
+                <div class="col-md-6">
+                    <h3 class="mb-1">{{i.product_name}}</h3>
+                    <h4>Rs. <b>{{i.price}}</b></h4>
+                    <p class="mb-1">{{i.desc}}</p>
+                    <span id="divpr{{i.id}}" class="divpr">
+                        <a href="#" id="pr{{i.id}}" class="btn btn-primary cart btn-sm my-1">Add to cart</a>
+                      </span>
+                    <a href="/shop/products/{{i.id}}" id="qv{{i.id}}" class="btn btn-outline-primary cart btn-sm my-1">Quick View</a>
+                </div>
+            </div>
+        </div> <hr>
+        {% endfor %}
+
+        {% else %}
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <div class="row">
+             <h1><i class="fas fa-exclamation-triangle mx-2"></i>Sorry</h1> <h3> We are unable to find your request!</h3>
+             <p>Please make sure to enter relevant search query</p>
+            </div>
+          </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    // document.getElementById('popcart').setAttribute('disabled', 'true');
+    // console.log(`working`);
+
+    const sum = (obj) => {
+      let total = 0;
+      Object.values(obj).forEach(ele => {
+        total += ele[0];
+      })
+      return total;
+    }
+
+
+    let cart;
+    // Find out the cart items from localStorage
+    if (localStorage.getItem('cart') === null) {
+      cart = {};
+    }
+    else {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      // document.getElementById('cart').innerHTML = Object.keys(cart).length;
+      document.getElementById('cart').innerHTML = sum(cart);
+      document.getElementById('disItem').innerHTML = Object.keys(cart).length;
+    }
+    updateCart(cart);
+
+
+    function updateCart(cart) {
+      for (let item in cart) {
+          if (document.getElementById('div' + item)!=null){
+
+              document.getElementById('div' + item).innerHTML = `<button id="minus${item}" class='btn btn-primary btn-sm mx-1 minus'>-</button><span id='val${item}'> ${cart[item][0]} </span><button id="plus${item}" class='btn btn-primary btn-sm mx-1 plus'>+</button>`;
+            }
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      document.getElementById('cart').innerHTML = sum(cart);
+      document.getElementById('disItem').innerHTML = Object.keys(cart).length;
+    }
+
+    function updatePopover(cart) {
+      // console.log(`We are inside updatePopover`);
+      let popStr = "";
+      let i = 1;
+      for (let item in cart) {
+        popStr += '<b>' + i + '</b>. ';
+        popStr += cart[item][1] + ' - Qty: ' + cart[item][0] + '<br>';
+        i += 1;
+      }
+      popStr += `<a href="/shop/checkout/" type="button" class="btn btn-primary btn-sm mx-1">Checkout</a>`;
+
+      // Add popover to cart
+      let popcart = document.getElementById('popcart');
+      // popcart.popover('show');
+      // $('#popcart').popover();
+      popcart.setAttribute('title', 'Cart for your items in my shopping cart')
+      popcart.setAttribute('data-bs-content', popStr);
+      let popover = new bootstrap.Popover(popcart, {
+        container: 'body',
+        html: true
+      })
+    }
+    updatePopover(cart);
+
+
+    // If the add to cart button is clicked, add/increment the item
+    let cartBtn = document.getElementsByClassName('cart');
+    Array.from(cartBtn).forEach(element => {
+      element.addEventListener('click', () => {
+        // console.log(`clicked`);
+        let idstr = element.id.toString();
+        // console.log(idstr);
+        if (cart[idstr] !== undefined) {
+          qty = cart[idstr][0] + 1;
+        }
+        else {
+          qty = 1;
+          name = document.getElementById('name' + idstr).innerHTML;
+          price = document.getElementById('price' + idstr).innerHTML;
+          cart[idstr] = [qty, name, parseInt(price)];
+        }
+        // console.log(cart);
+        updateCart(cart);
+        updatePopover(cart);
+      })
+    });
+
+
+    // If plus or minus button is clicked, change the cart as well as the display value
+    let minus = document.getElementsByClassName('minus');
+    Array.from(minus).forEach(element => {
+      element.addEventListener('click', () => {
+        let a = element.id.slice(7,);
+        cart['pr' + a][0] -= 1;
+        cart['pr' + a][0] = Math.max(0, cart['pr' + a][0]);
+        document.getElementById('valpr' + a).innerHTML = cart['pr' + a][0];
+        if (cart['pr' + a][0] == 0) {
+          delete cart['pr' + a];
+          document.getElementById('divpr' + a).innerHTML = `<a href="#" id="pr${a}" class="btn btn-primary cart btn-sm my-1">Add to cart</a>`;
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById('cart').innerHTML = sum(cart);
+        document.getElementById('disItem').innerHTML = Object.keys(cart).length;
+        updatePopover(cart);
+      })
+    })
+
+    let plus = document.getElementsByClassName('plus');
+    Array.from(plus).forEach(element => {
+      element.addEventListener('click', () => {
+        let a = element.id.slice(6,);
+        cart['pr' + a][0] += 1;
+        document.getElementById('valpr' + a).innerHTML = cart['pr' + a][0];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById('cart').innerHTML = sum(cart);
+        document.getElementById('disItem').innerHTML = Object.keys(cart).length;
+        updatePopover(cart);
+      })
+    })
+</script>
+{% endblock %}
